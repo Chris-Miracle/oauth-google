@@ -25,22 +25,34 @@ if (isset($_GET['code'])) {
   $email =  $google_account_info->email;
   $name =  $google_account_info->name;
 
+  // Heroku Db
   $url = getenv('JAWSDB_URL');
-    $dbparts = parse_url($url);
+  $dbparts = parse_url($url);
 
-    $hostname = $dbparts['host-axocheck'];
-    $username = $dbparts['user-chris'];
-    $password = $dbparts['pass-chris'];
-  
-    // Create connection
-    $conn = new mysqli($hostname, $username, $password, $database);
+  $hostname = $dbparts['host-axocheck'];
+  $username = $dbparts['user-chris'];
+  $password = $dbparts['pass-chris'];
+  $database = ltrim($dbparts['path'],'/');
 
-    // Check connection
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
+  // Create connection
+  $conn = new mysqli($hostname, $username, $password, $database);
+
+  // Check connection
+  if ($conn->connect_error) {
+      die("Connection failed: " . $conn->connect_error);
+  }
+
+    //Saving details into db
+    $sql = "INSERT INTO Users (name, email)
+    VALUES ($name, $email)";
+
+    if ($conn->query($sql) === TRUE) {
+      echo "New record created successfully";
+    } else {
+      echo "Error: " . $sql . "<br>" . $conn->error;
     }
 
-    $user_details = array_merge($email, $name);
+    $conn->close();
 
 } else {
   echo "<a href='".$client->createAuthUrl()."'>Google Login</a>";
